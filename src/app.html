@@ -177,8 +177,8 @@
   <script src="https://unpkg.com/vue@next"></script>
   <script>
     let app = Vue.createApp({
-      data() {
-        return {
+      data(){
+        return{
           inventory: {
             carrots: 0,
             pineapples: 0,
@@ -192,13 +192,12 @@
         }
       },
       methods: {
-        addToCart(type) {
-          this.cart[type] += this.inventory[type]
-          console.log(this.cart)
+        addToCart(type){
+          this.cart[type] += this.inventory[type];
+          console.log(this.cart);
         }
       }
     })
-
     app.mount('#app')
   </script>
 </body>
