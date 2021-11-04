@@ -129,11 +129,13 @@
       },
       computed: {
         cartCount() {
-          let count = 0;
-          for (const i in this.cart) {
-            count += this.cart[i];
-          }
-          return count;
+          //get counts with a fancy reduce statement. the 0 at the end is needed to start at 0 and prevent empty array errors
+          return Object.values(this.cart).reduce((sum, current) => sum + current, 0);
+
+          //Other way to get counts with a for loop
+          /*let count = 0;
+          for (const i in this.cart) {count += this.cart[i];}
+          return count;*/
         }
       },
       async mounted() {
@@ -148,13 +150,18 @@
       props: ['toggle', 'cart', 'remove', 'inventory'],
       computed: {
         cartTotal() {
-          let sum = 0;
+          //Fancy reduce statement
+          return Object.keys(this.cart)
+          .reduce((sum, current)=> sum + this.cart[current] * this.inventory[current].price.USD,0)
+          .toFixed(2);
 
+          //Old foreach statemeant
+          /*let sum = 0;
           Object.keys(this.cart).forEach(invIndex => {
             sum += this.cart[invIndex] * this.inventory[invIndex].price.USD;
           });
+          return sum.toFixed(2);*/
 
-          return (sum).toFixed(2);
         }
       },
       template: `
@@ -169,7 +176,7 @@
         </h1>
 
         <div class="cart-body">
-          <table v-for="(quantity, invIndex) in cart" key="invIndex" class="cart-table">
+          <table class="cart-table">
             <thead>
               <tr>
                 <th><span class="sr-only">Product Image</span></th>
@@ -181,7 +188,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr v-for="(quantity, invIndex) in cart" key="invIndex">
                 <td><i class="icofont-carrot icofont-3x"></i></td>
                 <td>{{ inventory[invIndex].name }}</td>
                 <td>\${{ (inventory[invIndex].price.USD).toFixed(2) }}</td>
