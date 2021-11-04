@@ -49,9 +49,9 @@
 
       <div class="recommended">
 
-        <div class="card">
+        <div v-for="(product, i) in inventory.slice(0,3)" key="i" class="card">
           <div class="card-title">
-            Carrots
+            {{product.name}}
           </div>
           <div class="card-body">
             <i class="icofont-10x icofont-carrot"></i>
@@ -61,7 +61,7 @@
                   <label>Type:</label>
                 </div>
                 <div class="cell">
-                  <em>Vegetable</em>
+                  <em>{{product.type}}</em>
                 </div>
               </div>
               <div class="row">
@@ -69,7 +69,7 @@
                   <label>Price:</label>
                 </div>
                 <div class="cell">
-                  $4.82
+                  ${{(product.price.USD).toFixed(2)}}
                 </div>
               </div>
               <div class="row">
@@ -77,91 +77,15 @@
                   <label>Quantity:</label>
                 </div>
                 <div class="cell">
-                  <input type="number" v-model.number="inventory.carrots">
+                  <input type="number" v-model.number="product.quantity">
                 </div>
               </div>
             </form>
           </div>
           <div class="card-footer">
-            <button @click="addToCart('carrots')" class="btn btn-light">
+            <button @click="addToCart(i)" class="btn btn-light">
               Add to cart
             </button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">
-            Pineapples
-          </div>
-          <div class="card-body">
-            <i class="icofont-10x icofont-pineapple"></i>
-            <form>
-              <div class="row">
-                <div class="cell">
-                  <label>Type:</label>
-                </div>
-                <div class="cell">
-                  <em>Fruit</em>
-                </div>
-              </div>
-              <div class="row">
-                <div class="cell">
-                  <label>Price:</label>
-                </div>
-                <div class="cell">
-                  $1.62
-                </div>
-              </div>
-              <div class="row">
-                <div class="cell">
-                  <label>Quantity:</label>
-                </div>
-                <div class="cell">
-                  <input type="number" v-model="inventory.pineapples">
-                </div>
-              </div>
-            </form>
-          </div>
-          <div class="card-footer">
-            <button class="btn btn-light">Add to cart</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">
-            Cherries
-          </div>
-          <div class="card-body">
-            <i class="icofont-10x icofont-cherry"></i>
-            <form>
-              <div class="row">
-                <div class="cell">
-                  <label>Type:</label>
-                </div>
-                <div class="cell">
-                  <em>Fruit</em>
-                </div>
-              </div>
-              <div class="row">
-                <div class="cell">
-                  <label>Price:</label>
-                </div>
-                <div class="cell">
-                  $1.04
-                </div>
-              </div>
-              <div class="row">
-                <div class="cell">
-                  <label>Quantity:</label>
-                </div>
-                <div class="cell">
-                  <input type="number" v-model="inventory.cherries">
-                </div>
-              </div>
-            </form>
-          </div>
-          <div class="card-footer">
-            <button class="btn btn-light">Add to cart</button>
           </div>
         </div>
 
@@ -169,12 +93,7 @@
 
     </main>
 
-    <sidebar 
-      v-if="sidebarVisible" 
-      :toggle="toggleCart" 
-      :cart="cart"
-      :remove="removeAllItem"
-    />
+    <sidebar v-if="sidebarVisible" :toggle="toggleCart" :cart="cart" :remove="removeAllItem" :inventory="inventory" />
 
     <footer>
     </footer>
@@ -186,40 +105,47 @@
     let app = Vue.createApp({
       data() {
         return {
-          inventory: {
-            carrots: 0,
-            pineapples: 0,
-            cherries: 0
-          },
-          cart: {
-            carrots: 0,
-            pineapples: 0,
-            cherries: 0
-          },
+          inventory: [],
+          cart: {},
           sidebarVisible: false
         }
       },
       methods: {
-        addToCart(type) {
-          this.cart[type] += this.inventory[type];
+        addToCart(id) {
+          if (!this.cart[id]) this.cart[id] = 0;//make sure cart has item
+          this.cart[id] += this.inventory[id].quantity;
+          if (this.cart[id] <= 0) delete this.cart[id];//clean up cart and prevent negative quantity
+          this.inventory[id].quantity = 0;//reset the quantity UI element
           console.log(this.cart);
-          this.inventory[type] = 0;
         },
-        removeAllItem(type){
+        removeAllItem(type) {
           this.cart[type] = 0;
-          console.log("removing item",type);
+          console.log("removing item", type);
         },
         toggleCart() {
           this.sidebarVisible = !this.sidebarVisible;
         }
+      },
+      async mounted() {
+        const res = await fetch('./food.json');
+        const data = await res.json();
+        this.inventory = data;
+        console.log(this.inventory);
       }
     })
 
     app.component('sidebar', {
-      props: ['toggle', 'cart', 'remove'],
+      props: ['toggle', 'cart', 'remove', 'inventory'],
       computed: {
-        cartTotal(){
-          return (this.cart.carrots * 4.82).toFixed(2);
+        cartTotal() {
+          let sum = 0;
+
+          Object.keys(this.cart).forEach(invIndex => {
+            sum += this.cart[invIndex] * this.inventory[invIndex].price.USD;
+          });
+
+          return (sum).toFixed(2);
+         // return (this.cart.carrots * 4.82).toFixed(2);
         }
       },
       template: `
@@ -234,7 +160,7 @@
         </h1>
 
         <div class="cart-body">
-          <table class="cart-table">
+          <table v-for="(quantity, invIndex) in cart" key="invIndex" class="cart-table">
             <thead>
               <tr>
                 <th><span class="sr-only">Product Image</span></th>
@@ -248,10 +174,10 @@
             <tbody>
               <tr>
                 <td><i class="icofont-carrot icofont-3x"></i></td>
-                <td>Carrot</td>
-                <td>$4.82</td>
-                <td class="center">{{ cart.carrots }}</td>
-                <td>\${{cart.carrots * 4.82}}</td>
+                <td>{{ inventory[invIndex].name }}</td>
+                <td>\${{ inventory[invIndex].price.USD }}</td>
+                <td class="center">{{ quantity }}</td>
+                <td>\${{ (quantity * inventory[invIndex].price.USD).toFixed(2) }}</td>
                 <td class="center">
                   <button class="btn btn-light cart-remove" @click="remove('carrots')">
                     &times;
