@@ -3,6 +3,7 @@
 
 <head>
   <title>Splendid Food</title>
+
   <link rel="stylesheet" href="styles/style.min.css">
   <link rel="icon" href="../public/favicon.ico" type="image/x-icon">
   <link rel="shortcut icon" href="../public/favicon.ico" type="image/ico">
@@ -10,95 +11,95 @@
 
 <body>
 
-  <div id="app">
+    <div id="app" v-cloak>
 
-    <header class="top-bar spread">
-      <nav class="top-bar-nav">
-        <a href="#" class="top-bar-link">
-          <i class="icofont-spoon-and-fork"></i>
-          <span>Home</span>
-        </a>
-        <a href="views/products.html" class="top-bar-link">
-          <span>Products</span>
-        </a>
-        <a href="views/past-orders.html" class="top-bar-link">
-          <span>Past Orders</span>
-        </a>
-        <a href="views/test-thing.html" class="top-bar-link">
-          <span>
-            test-thing
+      <header class="top-bar spread">
+        <nav class="top-bar-nav">
+          <a href="#" class="top-bar-link">
             <i class="icofont-spoon-and-fork"></i>
-          </span>
+            <span>Home</span>
+          </a>
+          <a href="views/products.html" class="top-bar-link">
+            <span>Products</span>
+          </a>
+          <a href="views/past-orders.html" class="top-bar-link">
+            <span>Past Orders</span>
+          </a>
+          <a href="views/test-thing.html" class="top-bar-link">
+            <span>
+              test-thing
+              <i class="icofont-spoon-and-fork"></i>
+            </span>
+          </a>
+        </nav>
+        <a @click="toggleCart" class="top-bar-cart-link">
+          <i class="icofont-cart-alt icofont-1x"></i>
+          <span>Cart ({{ cartCount }})</span>
         </a>
-      </nav>
-      <a @click="toggleCart" class="top-bar-cart-link">
-        <i class="icofont-cart-alt icofont-1x"></i>
-        <span>Cart ({{ cartCount }})</span>
-      </a>
-    </header>
+      </header>
 
-    <div class="splash-container">
-      <div class="splash">
-        <h1>Splendid Food</h1>
+      <div class="splash-container">
+        <div class="splash">
+          <h1>Splendid Food</h1>
+        </div>
       </div>
-    </div>
 
-    <main class="wrapper">
+      <main class="wrapper">
 
-      <h2>Recommended</h2>
+        <h2>Recommended</h2>
 
-      <div class="recommended">
+        <div class="recommended">
 
-        <div v-for="(product, i) in inventory.slice(0,3)" key="i" class="card">
-          <div class="card-title">
-            {{product.name}}
+          <div v-for="(product, i) in inventory.slice(0,3)" key="i" class="card">
+            <div class="card-title">
+              {{product.name}}
+            </div>
+            <div class="card-body">
+              <i class="icofont-10x icofont-carrot"></i>
+              <form>
+                <div class="row">
+                  <div class="cell">
+                    <label>Type:</label>
+                  </div>
+                  <div class="cell">
+                    <em>{{product.type}}</em>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="cell">
+                    <label>Price:</label>
+                  </div>
+                  <div class="cell">
+                    ${{(product.price.USD).toFixed(2)}}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="cell">
+                    <label>Quantity:</label>
+                  </div>
+                  <div class="cell">
+                    <input type="number" v-model.number="product.quantity">
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="card-footer">
+              <button @click="addToCart(i)" class="btn btn-light">
+                Add to cart
+              </button>
+            </div>
           </div>
-          <div class="card-body">
-            <i class="icofont-10x icofont-carrot"></i>
-            <form>
-              <div class="row">
-                <div class="cell">
-                  <label>Type:</label>
-                </div>
-                <div class="cell">
-                  <em>{{product.type}}</em>
-                </div>
-              </div>
-              <div class="row">
-                <div class="cell">
-                  <label>Price:</label>
-                </div>
-                <div class="cell">
-                  ${{(product.price.USD).toFixed(2)}}
-                </div>
-              </div>
-              <div class="row">
-                <div class="cell">
-                  <label>Quantity:</label>
-                </div>
-                <div class="cell">
-                  <input type="number" v-model.number="product.quantity">
-                </div>
-              </div>
-            </form>
-          </div>
-          <div class="card-footer">
-            <button @click="addToCart(i)" class="btn btn-light">
-              Add to cart
-            </button>
-          </div>
+
         </div>
 
-      </div>
+      </main>
 
-    </main>
+      <sidebar v-if="sidebarVisible" :toggle="toggleCart" :cart="cart" :remove="removeAllItem" :inventory="inventory" />
 
-    <sidebar v-if="sidebarVisible" :toggle="toggleCart" :cart="cart" :remove="removeAllItem" :inventory="inventory" />
+      <footer>
+      </footer>
 
-    <footer>
-    </footer>
-
-  </div>
+    </div>
 
   <script src="https://unpkg.com/vue@next"></script>
   <script>
