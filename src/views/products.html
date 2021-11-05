@@ -26,9 +26,9 @@
           <span>test-thing</span>
         </a>
       </nav>
-      <a href="#" class="top-bar-cart-link">
+      <a @click="toggleCart" class="top-bar-cart-link">
         <i class="icofont-cart-alt icofont-1x"></i>
-        <span>Cart (0)</span>
+        <span>Cart ({{ cartCount }})</span>
       </a>
     </header>
 
@@ -265,9 +265,11 @@
         </div>
       </div>
     </main>
-    
+    <sidebar v-if="sidebarVisible" :toggle="toggleCart" :cart="cart" :remove="removeAllItem" :inventory="inventory" />
   </div>
 
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="../app.js"></script>
 </body>
 
 </html>
